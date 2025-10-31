@@ -22,7 +22,16 @@ from reportlab.lib import colors
 # ================= CONFIG =================
 st.set_page_config(page_title="DoctorFit MindTrack", page_icon="🧠", layout="centered")
 LOGO_PATH = "assets/logo_doctorfit.jpg"
-
+# ================= PWA CONFIG =================
+st.markdown("""
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#A6CE39">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-title" content="DoctorFit">
+<link rel="apple-touch-icon" href="assets/logo_doctorfit.jpg">
+""", unsafe_allow_html=True)
 # ================= CSS SIMPLIFICADO =================
 st.markdown("""
 <style>
@@ -1222,3 +1231,4 @@ elif st.session_state.page == "t_emoc":
         "Treino - Estabilidade"
 
     )
+
