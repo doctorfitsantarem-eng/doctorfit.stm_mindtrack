@@ -1,4 +1,4 @@
-# DoctorFit MindTrack — VERSÃO DEPLOY
+# DoctorFit MindTrack — VERSÃO DEPLOY CORRIGIDA
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -22,17 +22,8 @@ from reportlab.lib import colors
 # ================= CONFIG =================
 st.set_page_config(page_title="DoctorFit MindTrack", page_icon="🧠", layout="centered")
 LOGO_PATH = "assets/logo_doctorfit.jpg"
-# ================= PWA CONFIG =================
-st.markdown("""
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#A6CE39">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-title" content="DoctorFit">
-<link rel="apple-touch-icon" href="assets/logo_doctorfit.jpg">
-""", unsafe_allow_html=True)
-# ================= CSS SIMPLIFICADO =================
+
+# ================= CSS CORRIGIDO =================
 st.markdown("""
 <style>
 html, body, .stApp { 
@@ -40,10 +31,23 @@ html, body, .stApp {
     color: #ffffff !important;
     font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
 }
+
+/* CORREÇÃO DEFINITIVA DO ESPAÇAMENTO SUPERIOR */
+.stApp > [data-testid="stAppViewContainer"] {
+    padding-top: 0.5rem !important;
+}
+
 .block-container { 
-    padding-top: 1rem; 
+    padding-top: 0.5rem !important; 
     max-width: 1200px;
 }
+
+/* CONTAINER DO HEADER COM ESPAÇAMENTO */
+.header-main {
+    padding-top: 3rem !important;
+    margin-bottom: 2rem !important;
+}
+
 .app-title { 
     text-align: center; 
     font-size: 2.8rem; 
@@ -52,15 +56,18 @@ html, body, .stApp {
     margin-bottom: 0.2rem;
     letter-spacing: -0.5px;
     text-transform: uppercase;
+    padding-top: 2rem !important;
 }
+
 .app-subtitle {
     text-align: center;
     font-size: 1rem;
     color: #888888 !important;
     font-weight: 400;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem !important;
     letter-spacing: 0.5px;
 }
+
 .gradient-divider {
     width: 180px;
     height: 3px;
@@ -68,6 +75,7 @@ html, body, .stApp {
     margin: 0 auto 2rem;
     border-radius: 2px;
 }
+
 .stButton > button {
     width: 100%;
     background: #A6CE39;
@@ -79,11 +87,13 @@ html, body, .stApp {
     font-size: 0.95rem;
     transition: all 0.3s ease;
 }
+
 .stButton > button:hover {
     background: #8BC34A;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(166, 206, 57, 0.3);
 }
+
 .metric-corporate {
     background: #1a1a1a;
     border-radius: 10px;
@@ -93,15 +103,18 @@ html, body, .stApp {
     margin: 8px 0;
     transition: all 0.3s ease;
 }
+
 .metric-corporate:hover {
     border-color: #A6CE39;
     transform: translateY(-2px);
 }
+
 .metric-value-corporate {
     font-size: 2.2rem;
     font-weight: 700;
     color: #A6CE39;
 }
+
 .metric-label-corporate {
     font-size: 0.85rem;
     color: #888888;
@@ -109,22 +122,27 @@ html, body, .stApp {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
 h1, h2, h3 {
     color: #ffffff !important;
     font-weight: 600 !important;
 }
+
 h1 {
     font-size: 2rem !important;
     margin-bottom: 1.5rem !important;
     border-left: 4px solid #A6CE39;
     padding-left: 1rem;
 }
+
 .stSlider {
     margin: 1.2rem 0;
 }
+
 .stSlider > div > div {
     background: #A6CE39 !important;
 }
+
 .feedback-card {
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
     border: 1px solid #333;
@@ -133,10 +151,12 @@ h1 {
     margin: 10px 0;
     transition: all 0.3s ease;
 }
+
 .feedback-card:hover {
     border-color: #A6CE39;
     transform: translateY(-2px);
 }
+
 .history-card {
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
     border: 1px solid #3498DB;
@@ -145,6 +165,7 @@ h1 {
     margin: 10px 0;
     border-left: 4px solid #3498DB;
 }
+
 /* === RESPONSIVIDADE MOBILE & TABLET === */
 @media (max-width: 768px) {
     .block-container {
@@ -152,9 +173,14 @@ h1 {
         max-width: 100% !important;
     }
     
+    .header-main {
+        padding-top: 2rem !important;
+    }
+    
     .app-title {
         font-size: 2rem !important;
         margin-bottom: 0.5rem !important;
+        padding-top: 1rem !important;
     }
     
     .app-subtitle {
@@ -198,6 +224,10 @@ h1 {
         max-width: 95% !important;
     }
     
+    .header-main {
+        padding-top: 2rem !important;
+    }
+    
     .app-title {
         font-size: 2.4rem !important;
     }
@@ -224,6 +254,10 @@ h1 {
 @media (max-height: 500px) and (orientation: landscape) {
     .block-container {
         padding-top: 0.5rem !important;
+    }
+    
+    .header-main {
+        padding-top: 1rem !important;
     }
     
     .app-title {
@@ -515,30 +549,28 @@ def gerar_insights_automaticos(scores):
     insights = []
     recomendacoes = []
     
-    # Análise de Autorregulação - VERSÃO SIMPLIFICADA
-    autorregulacao_geral = scores.get("Geral - Autorregulacao")
-    autorregulacao_treino = scores.get("Treino - Autorregulacao")
+    # Análise de Autorregulação
+    autorregulacao_geral = scores.get("Geral - Autorregulação")
+    autorregulacao_treino = scores.get("Treino - Autorregulação")
     
     if autorregulacao_geral and autorregulacao_geral <= 5:
-        insights.append("Desafio na Organizacao: Sua autorregulacao geral esta abaixo do ideal")
-        recomendacoes.append("Estabeleca rotinas diarias com horarios fixos")
+        insights.append("Desafio na Organização: Sua autorregulação geral está abaixo do ideal")
+        recomendacoes.append("Estabeleça rotinas diárias com horários fixos")
     
     if autorregulacao_treino and autorregulacao_treino <= 5:
-        insights.append("Consistencia no Treino: Dificuldade em manter regularidade")
-        recomendacoes.append("Agende os treinos como compromissos inadiaveis")
-    
-    return insights, recomendacoes
+        insights.append("Consistência no Treino: Dificuldade em manter regularidade")
+        recomendacoes.append("Agende os treinos como compromissos inadiáveis")
     
     # Análise de Autoeficácia
     autoeficacia_geral = scores.get("Geral - Autoeficácia")
     autoeficacia_treino = scores.get("Treino - Autoeficácia")
     
     if autoeficacia_geral and autoeficacia_geral <= 5:
-        insights.append("🎯 **Confiança em Desenvolvimento**: Crença nas capacidades pessoais precisa ser fortalecida")
+        insights.append("Confiança em Desenvolvimento: Crença nas capacidades pessoais precisa ser fortalecida")
         recomendacoes.append("Celebre pequenas vitórias diárias para construir confiança progressiva")
     
     if autoeficacia_treino and autoeficacia_treino >= 8:
-        insights.append("🚀 **Excelente Autoconfiança**: Grande confiança na capacidade de treinar")
+        insights.append("Excelente Autoconfiança: Grande confiança na capacidade de treinar")
         recomendacoes.append("Use essa confiança para explorar novos desafios e variedade de exercícios")
     
     # Análise de Estabilidade Emocional
@@ -546,16 +578,16 @@ def gerar_insights_automaticos(scores):
     estabilidade_treino = scores.get("Treino - Estabilidade")
     
     if estabilidade_geral and estabilidade_geral <= 5:
-        insights.append("🌊 **Sensibilidade Emocional**: Emoções afetam significativamente o dia a dia")
+        insights.append("Sensibilidade Emocional: Emoções afetam significativamente o dia a dia")
         recomendacoes.append("Pratique técnicas de respiração e mindfulness por 5 minutos ao dia")
     
     if estabilidade_treino and estabilidade_treino >= 7:
-        insights.append("⚖️ **Equilíbrio Sólido**: Boa capacidade de manter foco mesmo sob pressão")
+        insights.append("Equilíbrio Sólido: Boa capacidade de manter foco mesmo sob pressão")
     
     # Análise Comparativa
     if autorregulacao_treino and autoeficacia_treino:
         if autorregulacao_treino > autoeficacia_treino + 2:
-            insights.append("🔍 **Disparidade Interessante**: Tem disciplina, mas precisa trabalhar a confiança")
+            insights.append("Disparidade Interessante: Tem disciplina, mas precisa trabalhar a confiança")
             recomendacoes.append("Relembre conquistas passadas no treino para fortalecer a autoeficácia")
     
     # Insight de Perfil Completo
@@ -563,10 +595,10 @@ def gerar_insights_automaticos(scores):
     if scores_preenchidos:
         media_geral = sum(scores_preenchidos) / len(scores_preenchidos)
         if media_geral >= 8:
-            insights.append("🏆 **Perfil de Excelência**: Desempenho consistente em todas as dimensões")
+            insights.append("Perfil de Excelência: Desempenho consistente em todas as dimensões")
             recomendacoes.append("Mantenha os hábitos atuais e considere mentorar outros alunos")
         elif media_geral <= 4:
-            insights.append("🌱 **Fase de Fundamentos**: Foque no desenvolvimento das bases")
+            insights.append("Fase de Fundamentos: Foque no desenvolvimento das bases")
             recomendacoes.append("Trabalhe uma dimensão de cada vez, começando pela mais crítica")
     
     return insights, recomendacoes
@@ -914,23 +946,29 @@ def exibir_classificacao_instantanea():
             </div>
             """, unsafe_allow_html=True)
 
-# ================= PÁGINA CADASTRO =================
+# ================= PÁGINA CADASTRO CORRIGIDA =================
 def pagina_cadastro():
+    # Container principal com padding extra no topo
+    st.markdown('<div class="header-main">', unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
+        # Logo com espaçamento
         if os.path.exists(LOGO_PATH):
             b64 = image_to_base64(LOGO_PATH)
             if b64:
                 st.markdown(f"""
-                <div style='text-align:center; margin-bottom:1.5rem;'>
-                    <img src='data:image/jpeg;base64,{b64}' width='200' style='border-radius:8px;'>
+                <div style='text-align:center; margin-bottom:2rem; padding-top:1rem;'>
+                    <img src='data:image/jpeg;base64,{b64}' width='180' style='border-radius:8px;'>
                 </div>
                 """, unsafe_allow_html=True)
         
+        # Título e subtítulo
         st.markdown('<div class="app-title">DoctorFit MindTrack</div>', unsafe_allow_html=True)
         st.markdown('<div class="app-subtitle">Sistema de Avaliação Psicossocial</div>', unsafe_allow_html=True)
         st.markdown('<div class="gradient-divider"></div>', unsafe_allow_html=True)
         
+        # Formulário
         with st.form("cadastro_corporate"):
             st.session_state.aluno = st.text_input("Nome completo do aluno", 
                                                  st.session_state.aluno,
@@ -950,6 +988,8 @@ def pagina_cadastro():
             st.session_state.page = "menu"
             st.session_state.show_feedback = False
             st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ================= PÁGINA MENU COMPLETA =================
 def pagina_menu():
@@ -1229,6 +1269,4 @@ elif st.session_state.page == "t_emoc":
             "Quando algo me frustra no treino, não deixo que isso afete minha alimentação ou frequência."
         ],
         "Treino - Estabilidade"
-
     )
-
