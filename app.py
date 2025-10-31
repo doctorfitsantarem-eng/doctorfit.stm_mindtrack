@@ -136,6 +136,91 @@ h1 {
     margin: 10px 0;
     border-left: 4px solid #3498DB;
 }
+/* === RESPONSIVIDADE MOBILE & TABLET === */
+@media (max-width: 768px) {
+    .block-container {
+        padding: 0.5rem !important;
+        max-width: 100% !important;
+    }
+    
+    .app-title {
+        font-size: 2rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .app-subtitle {
+        font-size: 0.9rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .metric-corporate {
+        padding: 12px !important;
+        margin: 5px 0 !important;
+    }
+    
+    .metric-value-corporate {
+        font-size: 1.8rem !important;
+    }
+    
+    .stButton > button {
+        min-height: 48px !important;
+        font-size: 1rem !important;
+        padding: 14px 1rem !important;
+    }
+    
+    h1 {
+        font-size: 1.6rem !important;
+        padding-left: 0.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.3rem !important;
+    }
+    
+    h3 {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* === TABLET OPTIMIZATION === */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .block-container {
+        padding: 1rem !important;
+        max-width: 95% !important;
+    }
+    
+    .app-title {
+        font-size: 2.4rem !important;
+    }
+    
+    .metric-corporate {
+        padding: 15px !important;
+    }
+}
+
+/* === TOUCH FRIENDLY === */
+.stButton > button {
+    min-height: 44px;
+}
+
+.stSlider {
+    margin: 1rem 0;
+}
+
+.stSlider > div {
+    padding: 8px 0 !important;
+}
+
+/* === ORIENTATION SUPPORT === */
+@media (max-height: 500px) and (orientation: landscape) {
+    .block-container {
+        padding-top: 0.5rem !important;
+    }
+    
+    .app-title {
+        font-size: 1.8rem !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1135,4 +1220,5 @@ elif st.session_state.page == "t_emoc":
             "Quando algo me frustra no treino, não deixo que isso afete minha alimentação ou frequência."
         ],
         "Treino - Estabilidade"
+
     )
