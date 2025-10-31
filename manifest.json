@@ -1,7 +1,7 @@
 {
   "name": "DoctorFit MindTrack",
   "short_name": "DoctorFit",
-  "description": "Sistema de Avaliação Psicossocial para Acompanhamento de Desempenho",
+  "description": "Sistema de Avaliação Psicossocial",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
@@ -17,7 +17,7 @@
     },
     {
       "src": "assets/logo_doctorfit.jpg",
-      "sizes": "512x512", 
+      "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any maskable"
     }
