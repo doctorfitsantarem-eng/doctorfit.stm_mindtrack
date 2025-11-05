@@ -23,15 +23,36 @@ from reportlab.lib import colors
 st.set_page_config(page_title="DoctorFit MindTrack", page_icon="🧠", layout="centered")
 LOGO_PATH = "assets/logo_doctorfit.jpg"
 
-# ================= PWA CONFIG =================
+# ================= MOBILE CONFIG =================
+def setup_mobile_config():
+    """Configurações específicas para mobile"""
+    # Remove padding extra do Streamlit
+    st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .css-18e3th9 {padding-top: 1rem;}
+    </style>
+    """, unsafe_allow_html=True)
+
+setup_mobile_config()
+
+# ================= PWA & MOBILE CONFIG =================
 st.markdown("""
-<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#A6CE39">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-title" content="DoctorFit">
 <link rel="apple-touch-icon" href="assets/logo_doctorfit.jpg">
+<style>
+@viewport {
+    width: device-width;
+    zoom: 1.0;
+}
+</style>
 """, unsafe_allow_html=True)
 # ================= CSS RESPONSIVO =================
 st.markdown("""
@@ -147,7 +168,77 @@ h1 {
     margin: 10px 0;
     border-left: 4px solid #3498DB;
 }
+/* ========== MOBILE CRITICAL FIXES ========== */
+@media (max-width: 768px) {
+    /* Corrige overflow horizontal */
+    .main .block-container {
+        overflow-x: hidden !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+    
+    /* Corrige botões para touch */
+    .stButton > button {
+        min-height: 52px !important;
+        font-size: 1.1rem !important;
+        margin: 5px 0;
+    }
+    
+    /* Corrige sliders para mobile */
+    .stSlider {
+        padding: 8px 0 !important;
+    }
+    
+    .stSlider > div {
+        margin: 0 !important;
+    }
+    
+    /* Corrige containers de métricas */
+    .row-widget.stColumns {
+        gap: 5px !important;
+    }
+    
+    /* Corrige texto em colunas pequenas */
+    .metric-value-corporate {
+        font-size: 1.6rem !important;
+    }
+    
+    .metric-label-corporate {
+        font-size: 0.7rem !important;
+    }
+}
 
+/* ========== TABLET SPECIFIC FIXES ========== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .block-container {
+        padding: 1rem 1.5rem !important;
+    }
+    
+    .stButton > button {
+        min-height: 50px !important;
+        font-size: 1.05rem !important;
+    }
+}
+
+/* ========== LANDSCAPE MODE SUPPORT ========== */
+@media (max-height: 600px) and (orientation: landscape) {
+    .block-container {
+        padding-top: 0.2rem !important;
+    }
+    
+    .app-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    
+    .app-subtitle {
+        display: none; /* Esconde subtítulo em landscape */
+    }
+    
+    .gradient-divider {
+        margin-bottom: 0.5rem !important;
+    }
+}
 /* ========== RESPONSIVIDADE MOBILE & TABLET ========== */
 @media (max-width: 768px) {
     .block-container {
@@ -1123,51 +1214,69 @@ def pagina_menu():
 
 # ================= TELAS DE AVALIAÇÃO =================
 def tela_avaliacao(titulo, itens, label):
-    st.markdown(f"<h1>{titulo}</h1>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style='background:#1a1a1a; padding:18px; border-radius:10px; border-left:4px solid #A6CE39; margin:20px 0;'>
-    <p style='color:#cccccc; font-size:1rem; margin:0;'>
-    <strong>Instruções:</strong> Avalie cada afirmação de 0 a 10, onde:<br>
-    0 = Discordo totalmente | 10 = Concordo totalmente
-    </p>
+    # Header otimizado para mobile
+    st.markdown(f"""
+    <div style='margin-bottom:1rem;'>
+        <h1 style='font-size:1.6rem!important;'>{titulo}</h1>
     </div>
     """, unsafe_allow_html=True)
     
+    # Instruções simplificadas para mobile
+    st.info("💡 **Avalie de 0 a 10:** 0 = Discordo | 10 = Concordo totalmente")
+    
     vals = []
     for i, txt in enumerate(itens):
-        st.markdown(f"**{i+1}. {txt}**")
-        val = st.slider("", 0, 10, 5, key=f"{label}_{i}", label_visibility="collapsed")
-        
-        # Indicador visual
-        cor = "#E74C3C" if val <= 4 else "#F1C40F" if val <= 7 else "#A6CE39"
+        # Container responsivo para cada item
         st.markdown(f"""
-        <div style='background:#333333; border-radius:5px; height:6px; margin:5px 0 15px 0;'>
-            <div style='background:{cor}; border-radius:5px; height:6px; width:{val*10}%'></div>
-        </div>
-        <div style='text-align:center; color:#888888; font-size:0.85rem; margin-top:-5px;'>
-            Pontuação: {val}/10
+        <div style='
+            background: #1a1a1a; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin: 12px 0;
+            border-left: 4px solid #A6CE39;
+        '>
+            <strong>{i+1}. {txt}</strong>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Slider otimizado para mobile
+        val = st.slider(
+            f"Pontuação para pergunta {i+1}", 
+            0, 10, 5, 
+            key=f"{label}_{i}",
+            label_visibility="collapsed"
+        )
+        
+        # Indicador visual simplificado
+        cor = "#E74C3C" if val <= 4 else "#F1C40F" if val <= 7 else "#A6CE39"
+        st.markdown(f"""
+        <div style='
+            text-align: center; 
+            color: {cor}; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            margin: -5px 0 15px 0;
+        '>
+            ⬤ {val}/10
+        </div>
+        """, unsafe_allow_html=True)
+        
         vals.append(val)
     
-    col1, col2 = st.columns(2)
+    # Botões otimizados para mobile
+    col1, col2 = st.columns([1, 1])
     with col1:
-        if st.button("💾 Salvar Avaliação", use_container_width=True, type="primary"):
+        if st.button("💾 Salvar", use_container_width=True, type="primary"):
             save_score(label, round(sum(vals)/len(vals), 1))
-            
-            # Salva no histórico se for a última avaliação
             if all(v is not None for v in st.session_state.scores.values()):
                 salvar_avaliacao_historico()
-            
-            st.success("✅ Avaliação salva com sucesso!")
+            st.success("✅ Salvo!")
             st.session_state.page = "menu"
             st.rerun()
     with col2:
-        if st.button("↩️ Voltar ao Menu", use_container_width=True):
+        if st.button("↩️ Voltar", use_container_width=True):
             st.session_state.page = "menu"
             st.rerun()
-
 # ================= ROTEADOR PRINCIPAL =================
 ensure_state()
 
