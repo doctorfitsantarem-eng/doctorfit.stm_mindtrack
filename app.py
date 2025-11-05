@@ -1,4 +1,4 @@
-# DoctorFit MindTrack — VERSÃO DEPLOY
+# DoctorFit MindTrack — VERSÃO COMPLETA MOBILE
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,64 +11,67 @@ import hashlib
 import json
 
 # ================= IMPORTAÇÕES PARA PDF =================
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, letter
-from reportlab.lib.utils import ImageReader
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.units import inch
-from reportlab.lib import colors
+try:
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4, letter
+    from reportlab.lib.utils import ImageReader
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.units import inch
+    from reportlab.lib import colors
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
+    print("PDF features disabled - reportlab not available")
 
 # ================= CONFIG =================
-st.set_page_config(page_title="DoctorFit MindTrack", page_icon="🧠", layout="centered")
+st.set_page_config(
+    page_title="DoctorFit MindTrack", 
+    page_icon="🧠", 
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
+
 LOGO_PATH = "assets/logo_doctorfit.jpg"
 
 # ================= MOBILE CONFIG =================
 def setup_mobile_config():
     """Configurações específicas para mobile"""
-    # Remove padding extra do Streamlit
     st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#A6CE39">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .css-18e3th9 {padding-top: 1rem;}
+    @viewport {
+        width: device-width;
+        zoom: 1.0;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 setup_mobile_config()
 
-# ================= PWA & MOBILE CONFIG =================
-st.markdown("""
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<meta name="theme-color" content="#A6CE39">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-title" content="DoctorFit">
-<link rel="apple-touch-icon" href="assets/logo_doctorfit.jpg">
-<style>
-@viewport {
-    width: device-width;
-    zoom: 1.0;
-}
-</style>
-""", unsafe_allow_html=True)
-# ================= CSS RESPONSIVO =================
+# ================= CSS RESPONSIVO OTIMIZADO =================
 st.markdown("""
 <style>
-html, body, .stApp { 
+html, body, [class*="css"]  { 
     background: #000000 !important; 
     color: #ffffff !important;
     font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
 }
-.block-container { 
-    padding-top: 1rem; 
+
+/* Container principal */
+.main .block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     max-width: 1200px;
 }
+
+/* Header */
 .app-title { 
     text-align: center; 
-    font-size: 2.8rem; 
+    font-size: 2.2rem; 
     font-weight: 700 !important;
     color: #A6CE39 !important;
     margin-bottom: 0.2rem;
@@ -77,43 +80,48 @@ html, body, .stApp {
 }
 .app-subtitle {
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #888888 !important;
     font-weight: 400;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     letter-spacing: 0.5px;
 }
 .gradient-divider {
-    width: 180px;
+    width: 150px;
     height: 3px;
     background: linear-gradient(90deg, #A6CE39, #8BC34A);
-    margin: 0 auto 2rem;
+    margin: 0 auto 1.5rem;
     border-radius: 2px;
 }
+
+/* Botões otimizados para touch */
 .stButton > button {
     width: 100%;
     background: #A6CE39;
     color: #000000 !important;
     border: none;
     border-radius: 8px;
-    padding: 12px 1rem;
+    padding: 14px 1rem;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1rem;
     transition: all 0.3s ease;
-    min-height: 44px; /* Touch friendly */
+    min-height: 48px;
+    margin: 5px 0;
 }
 .stButton > button:hover {
     background: #8BC34A;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(166, 206, 57, 0.3);
 }
+
+/* Métricas */
 .metric-corporate {
     background: #1a1a1a;
     border-radius: 10px;
-    padding: 18px;
+    padding: 15px;
     text-align: center;
     border: 1px solid #333;
-    margin: 8px 0;
+    margin: 5px 0;
     transition: all 0.3s ease;
 }
 .metric-corporate:hover {
@@ -121,186 +129,117 @@ html, body, .stApp {
     transform: translateY(-2px);
 }
 .metric-value-corporate {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: #A6CE39;
 }
 .metric-label-corporate {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #888888;
     margin-top: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
+/* Títulos */
 h1, h2, h3 {
     color: #ffffff !important;
     font-weight: 600 !important;
 }
 h1 {
-    font-size: 2rem !important;
-    margin-bottom: 1.5rem !important;
+    font-size: 1.6rem !important;
+    margin-bottom: 1rem !important;
     border-left: 4px solid #A6CE39;
-    padding-left: 1rem;
+    padding-left: 0.8rem;
 }
+
+/* Sliders otimizados */
 .stSlider {
-    margin: 1.2rem 0;
+    margin: 1rem 0;
 }
 .stSlider > div > div {
     background: #A6CE39 !important;
 }
+
+/* Cards */
 .feedback-card {
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
     border: 1px solid #333;
     border-radius: 12px;
-    padding: 20px;
-    margin: 10px 0;
+    padding: 15px;
+    margin: 8px 0;
     transition: all 0.3s ease;
 }
 .feedback-card:hover {
     border-color: #A6CE39;
     transform: translateY(-2px);
 }
-.history-card {
-    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-    border: 1px solid #3498DB;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 10px 0;
-    border-left: 4px solid #3498DB;
-}
+
 /* ========== MOBILE CRITICAL FIXES ========== */
 @media (max-width: 768px) {
-    /* Corrige overflow horizontal */
     .main .block-container {
-        overflow-x: hidden !important;
         padding-left: 10px !important;
         padding-right: 10px !important;
-    }
-    
-    /* Corrige botões para touch */
-    .stButton > button {
-        min-height: 52px !important;
-        font-size: 1.1rem !important;
-        margin: 5px 0;
-    }
-    
-    /* Corrige sliders para mobile */
-    .stSlider {
-        padding: 8px 0 !important;
-    }
-    
-    .stSlider > div {
-        margin: 0 !important;
-    }
-    
-    /* Corrige containers de métricas */
-    .row-widget.stColumns {
-        gap: 5px !important;
-    }
-    
-    /* Corrige texto em colunas pequenas */
-    .metric-value-corporate {
-        font-size: 1.6rem !important;
-    }
-    
-    .metric-label-corporate {
-        font-size: 0.7rem !important;
-    }
-}
-
-/* ========== TABLET SPECIFIC FIXES ========== */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .block-container {
-        padding: 1rem 1.5rem !important;
-    }
-    
-    .stButton > button {
-        min-height: 50px !important;
-        font-size: 1.05rem !important;
-    }
-}
-
-/* ========== LANDSCAPE MODE SUPPORT ========== */
-@media (max-height: 600px) and (orientation: landscape) {
-    .block-container {
-        padding-top: 0.2rem !important;
-    }
-    
-    .app-title {
-        font-size: 1.5rem !important;
-        margin-bottom: 0.2rem !important;
-    }
-    
-    .app-subtitle {
-        display: none; /* Esconde subtítulo em landscape */
-    }
-    
-    .gradient-divider {
-        margin-bottom: 0.5rem !important;
-    }
-}
-/* ========== RESPONSIVIDADE MOBILE & TABLET ========== */
-@media (max-width: 768px) {
-    .block-container {
-        padding: 0.5rem !important;
+        padding-top: 0.5rem !important;
         max-width: 100% !important;
     }
     
     .app-title {
-        font-size: 2rem !important;
-        margin-bottom: 0.5rem !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 0.3rem !important;
     }
     
     .app-subtitle {
-        font-size: 0.9rem !important;
+        font-size: 0.8rem !important;
         margin-bottom: 1rem !important;
     }
     
     .gradient-divider {
-        width: 120px;
-        margin-bottom: 1.5rem;
+        width: 100px;
+        margin-bottom: 1rem;
     }
     
     .metric-corporate {
+        padding: 12px 8px !important;
+        margin: 3px 0 !important;
+    }
+    
+    .metric-value-corporate {
+        font-size: 1.5rem !important;
+    }
+    
+    .metric-label-corporate {
+        font-size: 0.65rem !important;
+    }
+    
+    .stButton > button {
+        min-height: 52px !important;
+        font-size: 1.1rem !important;
+        padding: 16px 1rem !important;
+    }
+    
+    h1 {
+        font-size: 1.4rem !important;
+        padding-left: 0.5rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+    
+    h2 {
+        font-size: 1.2rem !important;
+    }
+    
+    h3 {
+        font-size: 1rem !important;
+    }
+    
+    .feedback-card {
         padding: 12px !important;
         margin: 5px 0 !important;
     }
     
-    .metric-value-corporate {
-        font-size: 1.8rem !important;
-    }
-    
-    .metric-label-corporate {
-        font-size: 0.75rem !important;
-    }
-    
-    .stButton > button {
-        min-height: 48px !important;
-        font-size: 1rem !important;
-        padding: 14px 1rem !important;
-    }
-    
-    h1 {
-        font-size: 1.6rem !important;
-        padding-left: 0.5rem !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    h2 {
-        font-size: 1.3rem !important;
-    }
-    
-    h3 {
-        font-size: 1.1rem !important;
-    }
-    
-    .feedback-card {
-        padding: 15px !important;
-    }
-    
     /* Ajuste para colunas em mobile */
     .row-widget.stColumns {
-        gap: 8px;
+        gap: 5px;
     }
 }
 
@@ -312,28 +251,39 @@ h1 {
     }
     
     .app-title {
-        font-size: 2.4rem !important;
+        font-size: 2rem !important;
     }
     
     .metric-corporate {
-        padding: 15px !important;
+        padding: 15px 10px !important;
     }
 }
 
-/* ========== ORIENTATION SUPPORT ========== */
+/* ========== LANDSCAPE MODE ========== */
 @media (max-height: 500px) and (orientation: landscape) {
     .block-container {
-        padding-top: 0.5rem !important;
+        padding-top: 0.2rem !important;
     }
     
     .app-title {
-        font-size: 1.8rem !important;
+        font-size: 1.5rem !important;
+        margin-bottom: 0.2rem !important;
     }
     
     .app-subtitle {
         margin-bottom: 0.5rem !important;
+        font-size: 0.7rem !important;
+    }
+    
+    .gradient-divider {
+        margin-bottom: 0.8rem !important;
     }
 }
+
+/* Hide Streamlit elements */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -619,26 +569,24 @@ def gerar_insights_automaticos(scores):
     insights = []
     recomendacoes = []
     
-    # Análise de Autorregulação - VERSÃO SIMPLIFICADA
-    autorregulacao_geral = scores.get("Geral - Autorregulacao")
-    autorregulacao_treino = scores.get("Treino - Autorregulacao")
+    # Análise de Autorregulação
+    autorregulacao_geral = scores.get("Geral - Autorregulação")
+    autorregulacao_treino = scores.get("Treino - Autorregulação")
     
     if autorregulacao_geral and autorregulacao_geral <= 5:
-        insights.append("Desafio na Organizacao: Sua autorregulacao geral esta abaixo do ideal")
-        recomendacoes.append("Estabeleca rotinas diarias com horarios fixos")
+        insights.append("🎯 **Desafio na Organização**: Sua autorregulação geral está abaixo do ideal")
+        recomendacoes.append("Estabeleça rotinas diárias com horários fixos para atividades importantes")
     
     if autorregulacao_treino and autorregulacao_treino <= 5:
-        insights.append("Consistencia no Treino: Dificuldade em manter regularidade")
-        recomendacoes.append("Agende os treinos como compromissos inadiaveis")
-    
-    return insights, recomendacoes
+        insights.append("💪 **Consistência no Treino**: Dificuldade em manter regularidade nos exercícios")
+        recomendacoes.append("Agende os treinos como compromissos inadiáveis na sua agenda")
     
     # Análise de Autoeficácia
     autoeficacia_geral = scores.get("Geral - Autoeficácia")
     autoeficacia_treino = scores.get("Treino - Autoeficácia")
     
     if autoeficacia_geral and autoeficacia_geral <= 5:
-        insights.append("🎯 **Confiança em Desenvolvimento**: Crença nas capacidades pessoais precisa ser fortalecida")
+        insights.append("🌟 **Confiança em Desenvolvimento**: Crença nas capacidades pessoais precisa ser fortalecida")
         recomendacoes.append("Celebre pequenas vitórias diárias para construir confiança progressiva")
     
     if autoeficacia_treino and autoeficacia_treino >= 8:
@@ -798,6 +746,10 @@ def gerar_tres_graficos():
 # ================= SISTEMA DE PDF PREMIUM =================
 def gerar_relatorio_pdf():
     """Gera relatório PDF premium com design profissional"""
+    if not PDF_AVAILABLE:
+        st.error("Funcionalidade PDF não disponível. Instale: pip install reportlab")
+        return None
+        
     try:
         # Dados básicos
         nome = st.session_state.aluno
@@ -1022,14 +974,13 @@ def exibir_classificacao_instantanea():
 def pagina_cadastro():
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
+        # Logo responsiva
         if os.path.exists(LOGO_PATH):
-            b64 = image_to_base64(LOGO_PATH)
-            if b64:
-                st.markdown(f"""
-                <div style='text-align:center; margin-bottom:1.5rem;'>
-                    <img src='data:image/jpeg;base64,{b64}' width='200' style='border-radius:8px;'>
-                </div>
-                """, unsafe_allow_html=True)
+            try:
+                img = Image.open(LOGO_PATH)
+                st.image(img, width=150)
+            except:
+                pass
         
         st.markdown('<div class="app-title">DoctorFit MindTrack</div>', unsafe_allow_html=True)
         st.markdown('<div class="app-subtitle">Sistema de Avaliação Psicossocial</div>', unsafe_allow_html=True)
@@ -1177,6 +1128,8 @@ def pagina_menu():
                                 for file in os.listdir("."):
                                     if file.startswith("chart_") and file.endswith(".png"):
                                         os.remove(file)
+                                    if file.startswith("evolucao_") and file.endswith(".png"):
+                                        os.remove(file)
                                 if os.path.exists(pdf_path):
                                     os.remove(pdf_path)
                             except:
@@ -1212,17 +1165,11 @@ def pagina_menu():
         if st.button("⚡ Estabilidade no Treino", use_container_width=True, key="btn_t_emoc"):
             st.session_state.page = "t_emoc"; st.rerun()
 
-# ================= TELAS DE AVALIAÇÃO =================
+# ================= TELAS DE AVALIAÇÃO OTIMIZADAS =================
 def tela_avaliacao(titulo, itens, label):
-    # Header otimizado para mobile
-    st.markdown(f"""
-    <div style='margin-bottom:1rem;'>
-        <h1 style='font-size:1.6rem!important;'>{titulo}</h1>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"<h1>{titulo}</h1>", unsafe_allow_html=True)
     
-    # Instruções simplificadas para mobile
-    st.info("💡 **Avalie de 0 a 10:** 0 = Discordo | 10 = Concordo totalmente")
+    st.info("💡 **Avalie de 0 a 10:** 0 = Discordo totalmente | 10 = Concordo totalmente")
     
     vals = []
     for i, txt in enumerate(itens):
@@ -1235,7 +1182,7 @@ def tela_avaliacao(titulo, itens, label):
             margin: 12px 0;
             border-left: 4px solid #A6CE39;
         '>
-            <strong>{i+1}. {txt}</strong>
+            <strong style='color: #ffffff; font-size: 1rem;'>{i+1}. {txt}</strong>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1268,15 +1215,19 @@ def tela_avaliacao(titulo, itens, label):
     with col1:
         if st.button("💾 Salvar", use_container_width=True, type="primary"):
             save_score(label, round(sum(vals)/len(vals), 1))
+            
+            # Salva no histórico se for a última avaliação
             if all(v is not None for v in st.session_state.scores.values()):
                 salvar_avaliacao_historico()
-            st.success("✅ Salvo!")
+            
+            st.success("✅ Avaliação salva com sucesso!")
             st.session_state.page = "menu"
             st.rerun()
     with col2:
         if st.button("↩️ Voltar", use_container_width=True):
             st.session_state.page = "menu"
             st.rerun()
+
 # ================= ROTEADOR PRINCIPAL =================
 ensure_state()
 
