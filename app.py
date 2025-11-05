@@ -55,10 +55,16 @@ setup_mobile_config()
 # ================= CSS RESPONSIVO OTIMIZADO =================
 st.markdown("""
 <style>
+/* FUNDO PRETO GARANTIDO */
 html, body, [class*="css"]  { 
     background: #000000 !important; 
     color: #ffffff !important;
     font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+.stApp {
+    background: #000000 !important;
+    background-color: #000000 !important;
 }
 
 /* Container principal */
@@ -66,6 +72,7 @@ html, body, [class*="css"]  {
     padding-top: 1rem;
     padding-bottom: 1rem;
     max-width: 1200px;
+    background: #000000 !important;
 }
 
 /* Header */
@@ -182,6 +189,7 @@ h1 {
         padding-right: 10px !important;
         padding-top: 0.5rem !important;
         max-width: 100% !important;
+        background: #000000 !important;
     }
     
     .app-title {
@@ -248,6 +256,7 @@ h1 {
     .block-container {
         padding: 1rem !important;
         max-width: 95% !important;
+        background: #000000 !important;
     }
     
     .app-title {
@@ -263,6 +272,7 @@ h1 {
 @media (max-height: 500px) and (orientation: landscape) {
     .block-container {
         padding-top: 0.2rem !important;
+        background: #000000 !important;
     }
     
     .app-title {
@@ -286,7 +296,6 @@ footer {visibility: hidden;}
 header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
-
 # ================= SISTEMA DE ESTADO ROBUSTO =================
 def ensure_state():
     """Sistema robusto de estado que persiste entre recarregamentos"""
