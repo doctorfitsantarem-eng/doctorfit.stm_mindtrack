@@ -23,7 +23,17 @@ from reportlab.lib import colors
 st.set_page_config(page_title="DoctorFit MindTrack", page_icon="🧠", layout="centered")
 LOGO_PATH = "assets/logo_doctorfit.jpg"
 
-# ================= CSS SIMPLIFICADO =================
+# ================= PWA CONFIG =================
+st.markdown("""
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#A6CE39">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-title" content="DoctorFit">
+<link rel="apple-touch-icon" href="assets/logo_doctorfit.jpg">
+""", unsafe_allow_html=True)
+# ================= CSS RESPONSIVO =================
 st.markdown("""
 <style>
 html, body, .stApp { 
@@ -69,6 +79,7 @@ html, body, .stApp {
     font-weight: 600;
     font-size: 0.95rem;
     transition: all 0.3s ease;
+    min-height: 44px; /* Touch friendly */
 }
 .stButton > button:hover {
     background: #8BC34A;
@@ -135,6 +146,102 @@ h1 {
     padding: 20px;
     margin: 10px 0;
     border-left: 4px solid #3498DB;
+}
+
+/* ========== RESPONSIVIDADE MOBILE & TABLET ========== */
+@media (max-width: 768px) {
+    .block-container {
+        padding: 0.5rem !important;
+        max-width: 100% !important;
+    }
+    
+    .app-title {
+        font-size: 2rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .app-subtitle {
+        font-size: 0.9rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .gradient-divider {
+        width: 120px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .metric-corporate {
+        padding: 12px !important;
+        margin: 5px 0 !important;
+    }
+    
+    .metric-value-corporate {
+        font-size: 1.8rem !important;
+    }
+    
+    .metric-label-corporate {
+        font-size: 0.75rem !important;
+    }
+    
+    .stButton > button {
+        min-height: 48px !important;
+        font-size: 1rem !important;
+        padding: 14px 1rem !important;
+    }
+    
+    h1 {
+        font-size: 1.6rem !important;
+        padding-left: 0.5rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    h2 {
+        font-size: 1.3rem !important;
+    }
+    
+    h3 {
+        font-size: 1.1rem !important;
+    }
+    
+    .feedback-card {
+        padding: 15px !important;
+    }
+    
+    /* Ajuste para colunas em mobile */
+    .row-widget.stColumns {
+        gap: 8px;
+    }
+}
+
+/* ========== TABLET OPTIMIZATION ========== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .block-container {
+        padding: 1rem !important;
+        max-width: 95% !important;
+    }
+    
+    .app-title {
+        font-size: 2.4rem !important;
+    }
+    
+    .metric-corporate {
+        padding: 15px !important;
+    }
+}
+
+/* ========== ORIENTATION SUPPORT ========== */
+@media (max-height: 500px) and (orientation: landscape) {
+    .block-container {
+        padding-top: 0.5rem !important;
+    }
+    
+    .app-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .app-subtitle {
+        margin-bottom: 0.5rem !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
