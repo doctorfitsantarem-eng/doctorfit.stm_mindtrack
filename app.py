@@ -1,4 +1,4 @@
-# DoctorFit MindTrack — SISTEMA COMPLETO SEPARADO
+# DoctorFit MindTrack — SISTEMA COMPLETO COM RELATÓRIOS PREMIUM
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -112,6 +112,35 @@ def salvar_no_historico(tipo_avaliacao):
     st.session_state.historico[aluno_key].append(registro)
     return True
 
+# ================= SISTEMA DE CLASSIFICAÇÃO =================
+def classificar_score(score: float, tipo: str) -> dict:
+    if score is None:
+        return {"categoria": "Não avaliado", "cor": "#555555", "feedback": "Avaliação pendente"}
+    
+    if tipo == "Autorregulação":
+        if score <= 4:
+            return {"categoria": "EM DESENVOLVIMENTO", "cor": "#E74C3C", "feedback": "Habilidade em fase de construção. Foque em estabelecer rotinas básicas."}
+        elif score <= 7:
+            return {"categoria": "INTERMEDIÁRIA", "cor": "#F1C40F", "feedback": "Habilidade presente com espaço para otimização. Trabalhe na consistência."}
+        else:
+            return {"categoria": "CONSOLIDADA", "cor": "#A6CE39", "feedback": "Excelente capacidade de autogestão. Mantenha a consistência."}
+    
+    elif tipo == "Autoeficácia":
+        if score <= 4:
+            return {"categoria": "EM FORMAÇÃO", "cor": "#E74C3C", "feedback": "Confiança em desenvolvimento. Foque em pequenas vitórias."}
+        elif score <= 7:
+            return {"categoria": "ESTABILIZADA", "cor": "#F1C40F", "feedback": "Confiança adequada. Continue construindo sobre bases sólidas."}
+        else:
+            return {"categoria": "EXCELENTE", "cor": "#A6CE39", "feedback": "Alta confiança nas capacidades. Ideal para desafios complexos."}
+    
+    elif tipo == "Estabilidade":
+        if score <= 4:
+            return {"categoria": "SENSÍVEL", "cor": "#E74C3C", "feedback": "Sensibilidade emocional elevada. Pratique técnicas de regulação."}
+        elif score <= 7:
+            return {"categoria": "EQUILIBRADA", "cor": "#F1C40F", "feedback": "Bom equilíbrio emocional. Desenvolva resiliência para pressão."}
+        else:
+            return {"categoria": "ROBUSTA", "cor": "#A6CE39", "feedback": "Excelente estabilidade emocional. Mantenha práticas de autocuidado."}
+
 # ================= SISTEMA DE ANÁLISE =================
 def gerar_insights_geral(scores):
     """Gera insights específicos para avaliação GERAL"""
@@ -125,14 +154,16 @@ def gerar_insights_geral(scores):
     if autorregulacao and autorregulacao <= 5:
         insights.append("🎯 **Organização Pessoal**: Desafio em manter rotinas e foco no dia a dia")
         recomendacoes.append("Estabeleça horários fixos para atividades importantes usando agenda")
+        recomendacoes.append("Divida tarefas grandes em etapas menores e com prazos definidos")
     
     if autorregulacao and autorregulacao >= 8:
         insights.append("✅ **Excelente Autogestão**: Boa capacidade de organização pessoal")
-        recomendacoes.append("Mantenha a consistência e compartilhe suas estratégias")
+        recomendacoes.append("Mantenha a consistência e compartilhe suas estratégias com outros")
     
     if autoeficacia and autoeficacia <= 5:
         insights.append("🌟 **Confiança em Desenvolvimento**: Crença nas capacidades precisa ser fortalecida")
         recomendacoes.append("Liste 3 pequenas conquistas diárias para construir autoconfiança")
+        recomendacoes.append("Enfrente um pequeno desafio por dia para expandir zona de conforto")
     
     if autoeficacia and autoeficacia >= 8:
         insights.append("🚀 **Alta Autoeficácia**: Grande confiança nas capacidades pessoais")
@@ -141,10 +172,17 @@ def gerar_insights_geral(scores):
     if estabilidade and estabilidade <= 5:
         insights.append("🌊 **Sensibilidade Emocional**: Emoções afetam significativamente o desempenho")
         recomendacoes.append("Pratique respiração profunda por 2 minutos ao sentir estresse")
+        recomendacoes.append("Mantenha um diário emocional para identificar padrões de reação")
     
     if estabilidade and estabilidade >= 7:
         insights.append("⚖️ **Equilíbrio Emocional**: Boa capacidade de lidar com pressões")
-        recomendacoes.append("Continue praticando autocuidado para manter o equilíbrio")
+        recomendacoes.append("Continue praticando autocuidado para manter o equilíbrio emocional")
+    
+    # Análise comparativa
+    if autorregulacao and autoeficacia:
+        if autorregulacao > autoeficacia + 2:
+            insights.append("🔍 **Disciplina > Confiança**: Tem organização, mas precisa trabalhar autoconfiança")
+            recomendacoes.append("Relembre conquistas passadas para fortalecer a autoeficácia")
     
     return insights, recomendacoes
 
@@ -160,14 +198,16 @@ def gerar_insights_treino(scores):
     if autorregulacao and autorregulacao <= 5:
         insights.append("💪 **Consistência no Treino**: Dificuldade em manter regularidade nos exercícios")
         recomendacoes.append("Agende os treinos como compromissos fixos na semana")
+        recomendacoes.append("Prepare a roupa de treino na noite anterior para reduzir barreiras")
     
     if autorregulacao and autorregulacao >= 8:
         insights.append("✅ **Excelente Disciplina no Treino**: Boa aderência à rotina de exercícios")
-        recomendacoes.append("Mantenha a consistência e explore novas modalidades")
+        recomendacoes.append("Mantenha a consistência e explore novas modalidades para variar")
     
     if autoeficacia and autoeficacia <= 5:
         insights.append("🎯 **Confiança no Treino**: Dúvidas sobre capacidade de evolução física")
         recomendacoes.append("Registre pequenas melhorias (ex: mais repetições, menos cansaço)")
+        recomendacoes.append("Foque no processo de evolução, não apenas nos resultados finais")
     
     if autoeficacia and autoeficacia >= 8:
         insights.append("🚀 **Alta Confiança no Treino**: Grande crença na capacidade de evolução")
@@ -176,10 +216,11 @@ def gerar_insights_treino(scores):
     if estabilidade and estabilidade <= 5:
         insights.append("⚡ **Sensibilidade no Treino**: Fatores externos afetam muito a motivação")
         recomendacoes.append("Crie um ritual pré-treino para entrar no estado mental adequado")
+        recomendacoes.append("Tenha um plano B para dias com imprevistos ou baixa motivação")
     
     if estabilidade and estabilidade >= 7:
         insights.append("🛡️ **Resiliência no Treino**: Boa capacidade de manter foco mesmo sob pressão")
-        recomendacoes.append("Continue desenvolvendo estratégias de coping para desafios")
+        recomendacoes.append("Continue desenvolvendo estratégias de coping para desafios específicos")
     
     return insights, recomendacoes
 
@@ -190,7 +231,15 @@ def gerar_grafico_avaliacao(scores, titulo, tipo):
     
     labels = list(scores.keys())
     valores = [scores[k] if scores[k] is not None else 0 for k in labels]
-    colors = ["#E74C3C" if v and v <= 4 else "#F1C40F" if v and v <= 7 else "#A6CE39" for v in valores]
+    
+    # Classifica cada score para definir cores
+    colors = []
+    for label, valor in zip(labels, valores):
+        if valor > 0:
+            classificacao = classificar_score(valor, label)
+            colors.append(classificacao["cor"])
+        else:
+            colors.append("#555555")
     
     dados_grafico = [(l, v, c) for l, v, c in zip(labels, valores, colors) if v > 0]
     if not dados_grafico:
@@ -200,25 +249,30 @@ def gerar_grafico_avaliacao(scores, titulo, tipo):
     valores_filtrado = [d[1] for d in dados_grafico]
     colors_filtrado = [d[2] for d in dados_grafico]
     
-    fig, ax = plt.subplots(figsize=(8, 4))
+    fig, ax = plt.subplots(figsize=(10, 5))
     
     # FUNDO PRETO NO GRÁFICO
     fig.patch.set_facecolor('#000000')
     ax.set_facecolor('#000000')
     
-    bars = ax.barh(labels_filtrado, valores_filtrado, color=colors_filtrado, height=0.6)
+    bars = ax.barh(labels_filtrado, valores_filtrado, color=colors_filtrado, 
+                   edgecolor="#111", linewidth=1, height=0.6)
     
     ax.set_xlim(0, 10)
-    ax.set_xlabel("Pontuação (0–10)", color="#cccccc", fontsize=11)
-    ax.set_title(titulo, color="#ffffff", fontsize=14, fontweight=600, pad=15)
+    ax.set_xlabel("Pontuação (0–10)", color="#cccccc", fontsize=12, fontweight=600)
+    ax.set_title(titulo, color="#ffffff", fontsize=16, fontweight=700, pad=20)
     
-    ax.grid(True, axis='x', alpha=0.1, color="#cccccc")
+    ax.grid(True, axis='x', alpha=0.2, color="#cccccc")
     ax.set_axisbelow(True)
-    ax.tick_params(colors="#cccccc", labelsize=10)
+    ax.tick_params(colors="#cccccc", labelsize=11)
     
-    for bar, v in zip(bars, valores_filtrado):
-        ax.text(bar.get_width() + 0.1, bar.get_y() + bar.get_height()/2, 
-                f"{v:.1f}", va='center', ha='left', color="#ffffff", fontsize=10)
+    # Adiciona valores e classificações nas barras
+    for bar, v, label in zip(bars, valores_filtrado, labels_filtrado):
+        classificacao = classificar_score(v, label)
+        ax.text(bar.get_width() + 0.2, bar.get_y() + bar.get_height()/2, 
+                f"{v:.1f}/10 - {classificacao['categoria']}", 
+                va='center', ha='left', color="#ffffff", 
+                fontsize=10, fontweight=500)
     
     plt.tight_layout()
     
@@ -230,14 +284,17 @@ def gerar_grafico_avaliacao(scores, titulo, tipo):
     
     return path
 
-# ================= SISTEMA DE RELATÓRIOS =================
+# ================= SISTEMA DE RELATÓRIOS PREMIUM =================
 def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
-    """Gera relatório PDF com fundo preto e análises"""
+    """Gera relatório PDF premium com design profissional"""
     try:
         from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import letter
+        from reportlab.lib.pagesizes import letter, A4
         from reportlab.lib.utils import ImageReader
         from reportlab.lib.units import inch
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.lib.colors import HexColor, black, white
         
         nome = st.session_state.aluno
         turma = st.session_state.turma
@@ -246,142 +303,182 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
         filename = f"Relatorio_{tipo_avaliacao}_{nome.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
         
         # Criar PDF
-        c = canvas.Canvas(filename, pagesize=letter)
-        width, height = letter
+        c = canvas.Canvas(filename, pagesize=A4)
+        width, height = A4
         
-        # FUNDO PRETO
-        c.setFillColorRGB(0, 0, 0)  # Preto
-        c.rect(0, 0, width, height, fill=1)
+        # CORES
+        COR_PRIMARIA = HexColor("#A6CE39")  # Verde DoctorFit
+        COR_TEXTO = black
+        COR_FUNDO = white
         
-        # Texto em branco
-        c.setFillColorRGB(1, 1, 1)  # Branco
+        # Configurar fonte
+        try:
+            # Tentar usar fontes mais profissionais
+            c.setFont("Helvetica-Bold", 16)
+        except:
+            c.setFont("Helvetica-Bold", 16)
         
-        # Cabeçalho
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(1*inch, height-1*inch, f"RELATÓRIO {tipo_avaliacao.upper()} - DOCTORFIT MINDTRACK")
+        # ===== CABEÇALHO =====
+        # Fundo do cabeçalho
+        c.setFillColor(COR_PRIMARIA)
+        c.rect(0, height-1.2*inch, width, 1.2*inch, fill=1)
         
-        # Informações do aluno
-        c.setFont("Helvetica", 10)
-        c.drawString(1*inch, height-1.5*inch, f"Aluno: {nome.upper()}")
-        c.drawString(1*inch, height-1.7*inch, f"Turma: {turma}")
-        c.drawString(1*inch, height-1.9*inch, f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+        # Título
+        c.setFillColor(black)
+        c.setFont("Helvetica-Bold", 18)
+        c.drawCentredString(width/2, height-0.7*inch, f"RELATÓRIO {tipo_avaliacao.upper()}")
+        c.setFont("Helvetica-Bold", 14)
+        c.drawCentredString(width/2, height-1.0*inch, "DOCTORFIT MINDTRACK")
         
-        y_position = height - 2.5*inch
+        # ===== INFORMAÇÕES DO ALUNO =====
+        y_position = height - 1.8*inch
         
-        # Métricas
-        if media:
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(1*inch, y_position, f"MÉDIA {tipo_avaliacao.upper()}: {media}/10")
-            y_position -= 0.3*inch
-        
-        # Scores detalhados
+        c.setFillColor(COR_TEXTO)
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(1*inch, y_position, "SCORES DETALHADOS:")
-        y_position -= 0.2*inch
+        c.drawString(1*inch, y_position, "INFORMAÇÕES DO ALUNO:")
+        y_position -= 0.25*inch
         
         c.setFont("Helvetica", 10)
+        c.drawString(1*inch, y_position, f"Nome: {nome.upper()}")
+        y_position -= 0.2*inch
+        c.drawString(1*inch, y_position, f"Turma: {turma}")
+        y_position -= 0.2*inch
+        c.drawString(1*inch, y_position, f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+        y_position -= 0.3*inch
+        
+        # ===== MÉTRICA PRINCIPAL =====
+        if media:
+            c.setFillColor(COR_PRIMARIA)
+            c.setFont("Helvetica-Bold", 14)
+            c.drawString(1*inch, y_position, f"MÉDIA {tipo_avaliacao.upper()}: {media}/10")
+            c.setFillColor(COR_TEXTO)
+            y_position -= 0.4*inch
+        
+        # ===== SCORES DETALHADOS COM CLASSIFICAÇÃO =====
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(1*inch, y_position, "RESULTADOS DETALHADOS:")
+        y_position -= 0.3*inch
+        
+        c.setFont("Helvetica", 9)
         for dimensao, score in scores.items():
             if score is not None:
+                classificacao = classificar_score(score, dimensao)
+                
+                # Dimensão e Score
                 c.drawString(1.2*inch, y_position, f"{dimensao}: {score}/10")
-                y_position -= 0.2*inch
-        
-        y_position -= 0.2*inch
-        
-        # Insights
-        if insights:
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(1*inch, y_position, "INSIGHTS IDENTIFICADOS:")
-            y_position -= 0.2*inch
-            
-            c.setFont("Helvetica", 9)
-            for insight in insights:
-                # Remove emojis para o PDF
-                insight_text = ''.join(char for char in insight if char.isprintable() and ord(char) < 128)
-                lines = []
-                words = insight_text.split()
+                
+                # Classificação com cor
+                c.setFillColor(HexColor(classificacao["cor"]))
+                c.drawString(4*inch, y_position, f"{classificacao['categoria']}")
+                c.setFillColor(COR_TEXTO)
+                
+                # Feedback
+                y_position -= 0.15*inch
+                feedback_lines = []
+                words = classificacao['feedback'].split()
                 current_line = ""
                 
                 for word in words:
-                    if len(current_line + " " + word) <= 60:
+                    if len(current_line + " " + word) <= 50:
                         current_line += " " + word if current_line else word
                     else:
-                        lines.append(current_line)
+                        feedback_lines.append(current_line)
                         current_line = word
                 if current_line:
-                    lines.append(current_line)
+                    feedback_lines.append(current_line)
                 
-                for line in lines:
-                    if y_position < 1*inch:  # Nova página se necessário
+                for line in feedback_lines:
+                    if y_position < 1.5*inch:
                         c.showPage()
-                        c.setFillColorRGB(0, 0, 0)
-                        c.rect(0, 0, width, height, fill=1)
-                        c.setFillColorRGB(1, 1, 1)
+                        c.setFillColor(COR_TEXTO)
                         y_position = height - 1*inch
                     
-                    c.drawString(1.2*inch, y_position, line)
-                    y_position -= 0.15*inch
+                    c.setFont("Helvetica-Oblique", 8)
+                    c.drawString(1.4*inch, y_position, f"  {line}")
+                    y_position -= 0.13*inch
+                
+                c.setFont("Helvetica", 9)
                 y_position -= 0.1*inch
         
-        # Recomendações
-        if recomendacoes:
-            if y_position < 1.5*inch:
+        y_position -= 0.2*inch
+        
+        # ===== GRÁFICO =====
+        grafico_path = gerar_grafico_avaliacao(scores, f"Resultados {tipo_avaliacao}", tipo_avaliacao)
+        if grafico_path and os.path.exists(grafico_path):
+            if y_position < 3.5*inch:
                 c.showPage()
-                c.setFillColorRGB(0, 0, 0)
-                c.rect(0, 0, width, height, fill=1)
-                c.setFillColorRGB(1, 1, 1)
+                c.setFillColor(COR_TEXTO)
                 y_position = height - 1*inch
             
             c.setFont("Helvetica-Bold", 12)
-            c.drawString(1*inch, y_position, "RECOMENDAÇÕES ESTRATÉGICAS:")
-            y_position -= 0.2*inch
-            
-            c.setFont("Helvetica", 9)
-            for i, recomendacao in enumerate(recomendacoes, 1):
-                lines = []
-                words = recomendacao.split()
-                current_line = f"{i}. "
-                
-                for word in words:
-                    if len(current_line + " " + word) <= 60:
-                        current_line += " " + word
-                    else:
-                        lines.append(current_line)
-                        current_line = "   " + word
-                if current_line:
-                    lines.append(current_line)
-                
-                for line in lines:
-                    if y_position < 1*inch:
-                        c.showPage()
-                        c.setFillColorRGB(0, 0, 0)
-                        c.rect(0, 0, width, height, fill=1)
-                        c.setFillColorRGB(1, 1, 1)
-                        y_position = height - 1*inch
-                    
-                    c.drawString(1.2*inch, y_position, line)
-                    y_position -= 0.15*inch
-                y_position -= 0.1*inch
-        
-        # Gráfico (se existir)
-        grafico_path = gerar_grafico_avaliacao(scores, f"Resultados {tipo_avaliacao}", tipo_avaliacao)
-        if grafico_path and os.path.exists(grafico_path):
-            if y_position < 3*inch:
-                c.showPage()
-                c.setFillColorRGB(0, 0, 0)
-                c.rect(0, 0, width, height, fill=1)
-                c.setFillColorRGB(1, 1, 1)
-                y_position = height - 1*inch
+            c.drawString(1*inch, y_position, "VISUALIZAÇÃO GRÁFICA:")
+            y_position -= 0.3*inch
             
             try:
-                c.drawString(1*inch, y_position, "VISUALIZAÇÃO DOS RESULTADOS:")
-                y_position -= 0.2*inch
-                
                 img = ImageReader(grafico_path)
-                c.drawImage(img, 1*inch, y_position-3*inch, width=6*inch, height=3*inch)
-            except:
-                pass
+                # Centralizar o gráfico
+                img_width = 6*inch
+                img_height = 3*inch
+                x_pos = (width - img_width) / 2
+                c.drawImage(img, x_pos, y_position - img_height, width=img_width, height=img_height)
+                y_position -= img_height + 0.3*inch
+            except Exception as e:
+                c.drawString(1.2*inch, y_position, "[Gráfico não disponível]")
+                y_position -= 0.3*inch
         
-        # Rodapé
+        # ===== INSIGHTS =====
+        if insights:
+            if y_position < 2*inch:
+                c.showPage()
+                c.setFillColor(COR_TEXTO)
+                y_position = height - 1*inch
+            
+            c.setFillColor(COR_PRIMARIA)
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(1*inch, y_position, "INSIGHTS IDENTIFICADOS:")
+            y_position -= 0.3*inch
+            
+            c.setFillColor(COR_TEXTO)
+            c.setFont("Helvetica", 9)
+            for i, insight in enumerate(insights, 1):
+                # Remove emojis para o PDF
+                insight_text = ''.join(char for char in insight if char.isprintable() and ord(char) < 128)
+                
+                if y_position < 1*inch:
+                    c.showPage()
+                    c.setFillColor(COR_TEXTO)
+                    y_position = height - 1*inch
+                
+                c.drawString(1.2*inch, y_position, f"{i}. {insight_text}")
+                y_position -= 0.2*inch
+            
+            y_position -= 0.1*inch
+        
+        # ===== RECOMENDAÇÕES =====
+        if recomendacoes:
+            if y_position < 2*inch:
+                c.showPage()
+                c.setFillColor(COR_TEXTO)
+                y_position = height - 1*inch
+            
+            c.setFillColor(HexColor("#3498db"))
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(1*inch, y_position, "RECOMENDAÇÕES ESTRATÉGICAS:")
+            y_position -= 0.3*inch
+            
+            c.setFillColor(COR_TEXTO)
+            c.setFont("Helvetica", 9)
+            for i, recomendacao in enumerate(recomendacoes, 1):
+                if y_position < 1*inch:
+                    c.showPage()
+                    c.setFillColor(COR_TEXTO)
+                    y_position = height - 1*inch
+                
+                c.drawString(1.2*inch, y_position, f"{i}. {recomendacao}")
+                y_position -= 0.18*inch
+        
+        # ===== RODAPÉ =====
+        c.setFillColor(HexColor("#666666"))
         c.setFont("Helvetica", 8)
         c.drawString(1*inch, 0.5*inch, f"Relatório gerado automaticamente pelo Sistema DoctorFit MindTrack • {datetime.now().strftime('%d/%m/%Y')}")
         
@@ -424,19 +521,23 @@ def pagina_menu_principal():
     
     with col1:
         completas_geral = sum(1 for v in st.session_state.scores_geral.values() if v is not None)
+        media_geral = calcular_media(st.session_state.scores_geral)
         st.markdown(f"""
         <div class='metric-card'>
             <div class='metric-value'>{completas_geral}/3</div>
             <div class='metric-label'>Avaliações Gerais</div>
+            <div class='metric-label'>Média: {media_geral if media_geral else '-'}/10</div>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         completas_treino = sum(1 for v in st.session_state.scores_treino.values() if v is not None)
+        media_treino = calcular_media(st.session_state.scores_treino)
         st.markdown(f"""
         <div class='metric-card'>
             <div class='metric-value'>{completas_treino}/3</div>
             <div class='metric-label'>Avaliações de Treino</div>
+            <div class='metric-label'>Média: {media_treino if media_treino else '-'}/10</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -525,7 +626,9 @@ def pagina_avaliacao_geral():
         
         if vals:
             scores[dimensao] = round(sum(vals) / len(vals), 1)
+            classificacao = classificar_score(scores[dimensao], dimensao)
             st.write(f"**Pontuação {dimensao}: {scores[dimensao]}/10**")
+            st.info(f"**Classificação:** {classificacao['categoria']} - {classificacao['feedback']}")
     
     col1, col2 = st.columns(2)
     
@@ -561,9 +664,18 @@ def pagina_avaliacao_geral():
             for rec in recomendacoes:
                 st.success(rec)
         
+        # Gráfico em tempo real
+        grafico_path = gerar_grafico_avaliacao(scores, "Resultados Avaliação Geral", "geral_preview")
+        if grafico_path:
+            st.image(grafico_path, use_column_width=True)
+            try:
+                os.remove(grafico_path)
+            except:
+                pass
+        
         # Botão para gerar relatório
         if st.button("📄 Gerar Relatório Geral em PDF", use_container_width=True):
-            with st.spinner("Gerando relatório..."):
+            with st.spinner("🔄 Gerando relatório premium..."):
                 pdf_path = gerar_relatorio_pdf(
                     st.session_state.scores_geral, 
                     insights, 
@@ -576,7 +688,7 @@ def pagina_avaliacao_geral():
                         pdf_bytes = f.read()
                     
                     st.download_button(
-                        label="⬇️ Baixar Relatório Geral",
+                        label="⬇️ Baixar Relatório Geral Premium",
                         data=pdf_bytes,
                         file_name=os.path.basename(pdf_path),
                         mime="application/pdf",
@@ -629,7 +741,9 @@ def pagina_avaliacao_treino():
         
         if vals:
             scores[dimensao] = round(sum(vals) / len(vals), 1)
+            classificacao = classificar_score(scores[dimensao], dimensao)
             st.write(f"**Pontuação {dimensao}: {scores[dimensao]}/10**")
+            st.info(f"**Classificação:** {classificacao['categoria']} - {classificacao['feedback']}")
     
     col1, col2 = st.columns(2)
     
@@ -665,9 +779,18 @@ def pagina_avaliacao_treino():
             for rec in recomendacoes:
                 st.success(rec)
         
+        # Gráfico em tempo real
+        grafico_path = gerar_grafico_avaliacao(scores, "Resultados Avaliação de Treino", "treino_preview")
+        if grafico_path:
+            st.image(grafico_path, use_column_width=True)
+            try:
+                os.remove(grafico_path)
+            except:
+                pass
+        
         # Botão para gerar relatório
         if st.button("📄 Gerar Relatório de Treino em PDF", use_container_width=True):
-            with st.spinner("Gerando relatório..."):
+            with st.spinner("🔄 Gerando relatório premium..."):
                 pdf_path = gerar_relatorio_pdf(
                     st.session_state.scores_treino, 
                     insights, 
@@ -680,7 +803,7 @@ def pagina_avaliacao_treino():
                         pdf_bytes = f.read()
                     
                     st.download_button(
-                        label="⬇️ Baixar Relatório de Treino",
+                        label="⬇️ Baixar Relatório de Treino Premium",
                         data=pdf_bytes,
                         file_name=os.path.basename(pdf_path),
                         mime="application/pdf",
