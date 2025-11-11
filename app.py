@@ -49,8 +49,51 @@ st.markdown("""
         margin: 8px 0;
         border-left: 4px solid #A6CE39;
     }
+    .report-header {
+        background: linear-gradient(135deg, #A6CE39 0%, #8BC34A 100%);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+        text-align: center;
+    }
+    .logo-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .logo-img {
+        max-width: 200px;
+        height: auto;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+# ================= FUNÇÃO PARA CARREGAR LOGO =================
+def carregar_logo():
+    """Carrega a logo da DoctorFit"""
+    try:
+        # Tenta carregar a logo se existir
+        logo = Image.open("logo.png")
+        return logo
+    except:
+        try:
+            logo = Image.open("logo.jpg")
+            return logo
+        except:
+            # Se não encontrar logo, retorna None
+            return None
+
+# ================= FUNÇÃO PARA LOGO BASE64 (PDF) =================
+def get_logo_base64():
+    """Converte a logo para base64 para uso no PDF"""
+    try:
+        logo = carregar_logo()
+        if logo:
+            buffered = BytesIO()
+            logo.save(buffered, format="PNG")
+            return base64.b64encode(buffered.getvalue()).decode()
+        return None
+    except:
+        return None
 
 # ================= SISTEMA DE ESTADO =================
 def ensure_state():
@@ -151,38 +194,62 @@ def gerar_insights_geral(scores):
     autoeficacia = scores.get("Autoeficácia")
     estabilidade = scores.get("Estabilidade")
     
-    if autorregulacao and autorregulacao <= 5:
-        insights.append("🎯 **Organização Pessoal**: Desafio em manter rotinas e foco no dia a dia")
-        recomendacoes.append("Estabeleça horários fixos para atividades importantes usando agenda")
-        recomendacoes.append("Divida tarefas grandes em etapas menores e com prazos definidos")
+    # Análise de Autorregulação
+    if autorregulacao is not None:
+        if autorregulacao <= 4:
+            insights.append("🎯 **Organização Pessoal**: Desafio significativo em manter rotinas e foco")
+            recomendacoes.append("Estabeleça horários fixos para atividades importantes usando agenda digital")
+            recomendacoes.append("Divida tarefas grandes em etapas menores com prazos específicos")
+            recomendacoes.append("Use técnicas Pomodoro (25min trabalho + 5min descanso) para melhorar o foco")
+        elif autorregulacao <= 6:
+            insights.append("📊 **Autogestão Intermediária**: Capacidade organizacional em desenvolvimento")
+            recomendacoes.append("Revise semanalmente suas metas e ajuste conforme necessário")
+            recomendacoes.append("Experimente diferentes métodos de planejamento (matriz Eisenhower, listas)")
+        else:
+            insights.append("✅ **Excelente Autogestão**: Habilidades organizacionais bem desenvolvidas")
+            recomendacoes.append("Mantenha a consistência e compartilhe suas estratégias com colegas")
+            recomendacoes.append("Considere mentorar outros em técnicas de organização pessoal")
     
-    if autorregulacao and autorregulacao >= 8:
-        insights.append("✅ **Excelente Autogestão**: Boa capacidade de organização pessoal")
-        recomendacoes.append("Mantenha a consistência e compartilhe suas estratégias com outros")
+    # Análise de Autoeficácia
+    if autoeficacia is not None:
+        if autoeficacia <= 4:
+            insights.append("🌟 **Confiança em Desenvolvimento**: Crença nas capacidades precisa ser fortalecida")
+            recomendacoes.append("Liste 3 pequenas conquistas diárias para construir autoconfiança")
+            recomendacoes.append("Enfrente um pequeno desafio por dia para expandir zona de conforto")
+            recomendacoes.append("Pratique afirmações positivas sobre suas capacidades")
+        elif autoeficacia <= 6:
+            insights.append("💪 **Confiança Estável**: Autoeficácia adequada com espaço para crescimento")
+            recomendacoes.append("Registre seus sucessos em um diário de conquistas")
+            recomendacoes.append("Busque feedback construtivo para validar suas capacidades")
+        else:
+            insights.append("🚀 **Alta Autoeficácia**: Grande confiança nas capacidades pessoais")
+            recomendacoes.append("Use essa confiança para assumir projetos desafiadores")
+            recomendacoes.append("Mentore colegas que possam se beneficiar da sua experiência")
     
-    if autoeficacia and autoeficacia <= 5:
-        insights.append("🌟 **Confiança em Desenvolvimento**: Crença nas capacidades precisa ser fortalecida")
-        recomendacoes.append("Liste 3 pequenas conquistas diárias para construir autoconfiança")
-        recomendacoes.append("Enfrente um pequeno desafio por dia para expandir zona de conforto")
+    # Análise de Estabilidade
+    if estabilidade is not None:
+        if estabilidade <= 4:
+            insights.append("🌊 **Sensibilidade Emocional**: Emoções afetam significativamente o desempenho")
+            recomendacoes.append("Pratique respiração profunda por 2 minutos ao sentir estresse")
+            recomendacoes.append("Mantenha um diário emocional para identificar padrões de reação")
+            recomendacoes.append("Desenvolva uma rotina de autocuidado (exercícios, meditação, hobbies)")
+        elif estabilidade <= 6:
+            insights.append("⚖️ **Equilíbrio Emocional**: Boa capacidade de lidar com pressões")
+            recomendacoes.append("Continue praticando técnicas de regulação emocional")
+            recomendacoes.append("Identifique gatilhos emocionais e desenvolva estratégias de coping")
+        else:
+            insights.append("🛡️ **Estabilidade Robusta**: Excelente resiliência emocional")
+            recomendacoes.append("Mantenha práticas de autocuidado para preservar o equilíbrio")
+            recomendacoes.append("Compartilhe suas estratégias de resiliência com outras pessoas")
     
-    if autoeficacia and autoeficacia >= 8:
-        insights.append("🚀 **Alta Autoeficácia**: Grande confiança nas capacidades pessoais")
-        recomendacoes.append("Use essa confiança para mentorar ou ajudar outros colegas")
-    
-    if estabilidade and estabilidade <= 5:
-        insights.append("🌊 **Sensibilidade Emocional**: Emoções afetam significativamente o desempenho")
-        recomendacoes.append("Pratique respiração profunda por 2 minutos ao sentir estresse")
-        recomendacoes.append("Mantenha um diário emocional para identificar padrões de reação")
-    
-    if estabilidade and estabilidade >= 7:
-        insights.append("⚖️ **Equilíbrio Emocional**: Boa capacidade de lidar com pressões")
-        recomendacoes.append("Continue praticando autocuidado para manter o equilíbrio emocional")
-    
-    # Análise comparativa
+    # Análises comparativas
     if autorregulacao and autoeficacia:
         if autorregulacao > autoeficacia + 2:
             insights.append("🔍 **Disciplina > Confiança**: Tem organização, mas precisa trabalhar autoconfiança")
             recomendacoes.append("Relembre conquistas passadas para fortalecer a autoeficácia")
+        elif autoeficacia > autorregulacao + 2:
+            insights.append("🎭 **Confiança > Disciplina**: Alta autoconfiança, mas organização precisa de atenção")
+            recomendacoes.append("Desenvolva sistemas e rotinas para apoiar sua confiança")
     
     return insights, recomendacoes
 
@@ -195,32 +262,53 @@ def gerar_insights_treino(scores):
     autoeficacia = scores.get("Autoeficácia") 
     estabilidade = scores.get("Estabilidade")
     
-    if autorregulacao and autorregulacao <= 5:
-        insights.append("💪 **Consistência no Treino**: Dificuldade em manter regularidade nos exercícios")
-        recomendacoes.append("Agende os treinos como compromissos fixos na semana")
-        recomendacoes.append("Prepare a roupa de treino na noite anterior para reduzir barreiras")
+    # Análise de Autorregulação no Treino
+    if autorregulacao is not None:
+        if autorregulacao <= 4:
+            insights.append("💪 **Consistência no Treino**: Dificuldade significativa em manter regularidade")
+            recomendacoes.append("Agende os treinos como compromissos fixos na semana")
+            recomendacoes.append("Prepare a roupa de treino na noite anterior para reduzir barreiras")
+            recomendacoes.append("Estabeleça metas semanais realistas de frequência")
+        elif autorregulacao <= 6:
+            insights.append("📈 **Disciplina em Desenvolvimento**: Regularidade adequada com espaço para melhoria")
+            recomendacoes.append("Monitore sua consistência com um aplicativo de treino")
+            recomendacoes.append("Crie recompensas para manter a motivação nos treinos")
+        else:
+            insights.append("✅ **Excelente Disciplina no Treino**: Adesão exemplar à rotina de exercícios")
+            recomendacoes.append("Mantenha a consistência e explore novas modalidades para variar")
+            recomendacoes.append("Compartilhe suas estratégias de aderência com outros atletas")
     
-    if autorregulacao and autorregulacao >= 8:
-        insights.append("✅ **Excelente Disciplina no Treino**: Boa aderência à rotina de exercícios")
-        recomendacoes.append("Mantenha a consistência e explore novas modalidades para variar")
+    # Análise de Autoeficácia no Treino
+    if autoeficacia is not None:
+        if autoeficacia <= 4:
+            insights.append("🎯 **Confiança no Treino**: Dúvidas significativas sobre capacidade de evolução")
+            recomendacoes.append("Registre pequenas melhorias (ex: mais repetições, menos cansaço)")
+            recomendacoes.append("Foque no processo de evolução, não apenas nos resultados finais")
+            recomendacoes.append("Trabalhe com um profissional para estabelecer metas realistas")
+        elif autoeficacia <= 6:
+            insights.append("💫 **Confiança Estável**: Crença adequada nas capacidades atléticas")
+            recomendacoes.append("Documente seus progressos com fotos e medidas")
+            recomendacoes.append("Celebre marcos importantes no seu desenvolvimento")
+        else:
+            insights.append("🚀 **Alta Confiança no Treino**: Grande crença na capacidade de evolução")
+            recomendacoes.append("Use essa mentalidade para superar platôs de desempenho")
+            recomendacoes.append("Estabeleça metas desafiadoras que aproveitem sua confiança")
     
-    if autoeficacia and autoeficacia <= 5:
-        insights.append("🎯 **Confiança no Treino**: Dúvidas sobre capacidade de evolução física")
-        recomendacoes.append("Registre pequenas melhorias (ex: mais repetições, menos cansaço)")
-        recomendacoes.append("Foque no processo de evolução, não apenas nos resultados finais")
-    
-    if autoeficacia and autoeficacia >= 8:
-        insights.append("🚀 **Alta Confiança no Treino**: Grande crença na capacidade de evolução")
-        recomendacoes.append("Use essa mentalidade para superar platôs de desempenho")
-    
-    if estabilidade and estabilidade <= 5:
-        insights.append("⚡ **Sensibilidade no Treino**: Fatores externos afetam muito a motivação")
-        recomendacoes.append("Crie um ritual pré-treino para entrar no estado mental adequado")
-        recomendacoes.append("Tenha um plano B para dias com imprevistos ou baixa motivação")
-    
-    if estabilidade and estabilidade >= 7:
-        insights.append("🛡️ **Resiliência no Treino**: Boa capacidade de manter foco mesmo sob pressão")
-        recomendacoes.append("Continue desenvolvendo estratégias de coping para desafios específicos")
+    # Análise de Estabilidade no Treino
+    if estabilidade is not None:
+        if estabilidade <= 4:
+            insights.append("⚡ **Sensibilidade no Treino**: Fatores externos afetam muito a motivação")
+            recomendacoes.append("Crie um ritual pré-treino para entrar no estado mental adequado")
+            recomendacoes.append("Tenha um plano B para dias com imprevistos ou baixa motivação")
+            recomendacoes.append("Pratique visualização positiva antes dos treinos")
+        elif estabilidade <= 6:
+            insights.append("🔄 **Resiliência em Desenvolvimento**: Capacidade adequada de lidar com adversidades")
+            recomendacoes.append("Desenvolva estratégias específicas para lidar com dias difíceis")
+            recomendacoes.append("Mantenha uma rotina de recuperação pós-treino")
+        else:
+            insights.append("🛡️ **Resiliência Robusta**: Excelente capacidade de manter foco sob pressão")
+            recomendacoes.append("Continue desenvolvendo estratégias de coping para desafios específicos")
+            recomendacoes.append("Aproveite sua resiliência para experimentar novos desafios esportivos")
     
     return insights, recomendacoes
 
@@ -308,36 +396,46 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
         
         # CORES
         COR_PRIMARIA = HexColor("#A6CE39")  # Verde DoctorFit
+        COR_SECUNDARIA = HexColor("#2C3E50")  # Azul escuro
         COR_TEXTO = black
         COR_FUNDO = white
         
         # Configurar fonte
         try:
-            # Tentar usar fontes mais profissionais
             c.setFont("Helvetica-Bold", 16)
         except:
             c.setFont("Helvetica-Bold", 16)
         
-        # ===== CABEÇALHO =====
+        # ===== CABEÇALHO COM LOGO =====
         # Fundo do cabeçalho
         c.setFillColor(COR_PRIMARIA)
-        c.rect(0, height-1.2*inch, width, 1.2*inch, fill=1)
+        c.rect(0, height-1.5*inch, width, 1.5*inch, fill=1)
+        
+        # Tenta adicionar a logo
+        logo_base64 = get_logo_base64()
+        if logo_base64:
+            try:
+                logo_img = ImageReader(BytesIO(base64.b64decode(logo_base64)))
+                c.drawImage(logo_img, 0.5*inch, height-1.3*inch, width=1*inch, height=1*inch, preserveAspectRatio=True)
+            except:
+                pass
         
         # Título
         c.setFillColor(black)
         c.setFont("Helvetica-Bold", 18)
-        c.drawCentredString(width/2, height-0.7*inch, f"RELATÓRIO {tipo_avaliacao.upper()}")
+        c.drawCentredString(width/2, height-0.8*inch, f"RELATÓRIO {tipo_avaliacao.upper()}")
         c.setFont("Helvetica-Bold", 14)
-        c.drawCentredString(width/2, height-1.0*inch, "DOCTORFIT MINDTRACK")
+        c.drawCentredString(width/2, height-1.1*inch, "DOCTORFIT MINDTRACK")
         
         # ===== INFORMAÇÕES DO ALUNO =====
-        y_position = height - 1.8*inch
+        y_position = height - 2.0*inch
         
-        c.setFillColor(COR_TEXTO)
+        c.setFillColor(COR_SECUNDARIA)
         c.setFont("Helvetica-Bold", 12)
         c.drawString(1*inch, y_position, "INFORMAÇÕES DO ALUNO:")
         y_position -= 0.25*inch
         
+        c.setFillColor(COR_TEXTO)
         c.setFont("Helvetica", 10)
         c.drawString(1*inch, y_position, f"Nome: {nome.upper()}")
         y_position -= 0.2*inch
@@ -352,13 +450,20 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
             c.setFont("Helvetica-Bold", 14)
             c.drawString(1*inch, y_position, f"MÉDIA {tipo_avaliacao.upper()}: {media}/10")
             c.setFillColor(COR_TEXTO)
+            
+            # Classificação da média
+            classificacao_media = classificar_score(media, "Autoeficácia")
+            c.setFont("Helvetica", 10)
+            c.drawString(1*inch, y_position - 0.2*inch, f"Classificação Geral: {classificacao_media['categoria']}")
             y_position -= 0.4*inch
         
         # ===== SCORES DETALHADOS COM CLASSIFICAÇÃO =====
+        c.setFillColor(COR_SECUNDARIA)
         c.setFont("Helvetica-Bold", 12)
         c.drawString(1*inch, y_position, "RESULTADOS DETALHADOS:")
         y_position -= 0.3*inch
         
+        c.setFillColor(COR_TEXTO)
         c.setFont("Helvetica", 9)
         for dimensao, score in scores.items():
             if score is not None:
@@ -410,6 +515,7 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
                 c.setFillColor(COR_TEXTO)
                 y_position = height - 1*inch
             
+            c.setFillColor(COR_SECUNDARIA)
             c.setFont("Helvetica-Bold", 12)
             c.drawString(1*inch, y_position, "VISUALIZAÇÃO GRÁFICA:")
             y_position -= 0.3*inch
@@ -426,7 +532,7 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
                 c.drawString(1.2*inch, y_position, "[Gráfico não disponível]")
                 y_position -= 0.3*inch
         
-        # ===== INSIGHTS =====
+        # ===== INSIGHTS ESTRATÉGICOS =====
         if insights:
             if y_position < 2*inch:
                 c.showPage()
@@ -435,8 +541,13 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
             
             c.setFillColor(COR_PRIMARIA)
             c.setFont("Helvetica-Bold", 12)
-            c.drawString(1*inch, y_position, "INSIGHTS IDENTIFICADOS:")
+            c.drawString(1*inch, y_position, "ANÁLISE ESTRATÉGICA:")
             y_position -= 0.3*inch
+            
+            c.setFillColor(COR_SECUNDARIA)
+            c.setFont("Helvetica-Bold", 11)
+            c.drawString(1*inch, y_position, "PRINCIPAIS INSIGHTS:")
+            y_position -= 0.25*inch
             
             c.setFillColor(COR_TEXTO)
             c.setFont("Helvetica", 9)
@@ -454,7 +565,7 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
             
             y_position -= 0.1*inch
         
-        # ===== RECOMENDAÇÕES =====
+        # ===== PLANO DE AÇÃO =====
         if recomendacoes:
             if y_position < 2*inch:
                 c.showPage()
@@ -462,9 +573,9 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
                 y_position = height - 1*inch
             
             c.setFillColor(HexColor("#3498db"))
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(1*inch, y_position, "RECOMENDAÇÕES ESTRATÉGICAS:")
-            y_position -= 0.3*inch
+            c.setFont("Helvetica-Bold", 11)
+            c.drawString(1*inch, y_position, "PLANO DE AÇÃO RECOMENDADO:")
+            y_position -= 0.25*inch
             
             c.setFillColor(COR_TEXTO)
             c.setFont("Helvetica", 9)
@@ -477,10 +588,57 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
                 c.drawString(1.2*inch, y_position, f"{i}. {recomendacao}")
                 y_position -= 0.18*inch
         
+        # ===== RESUMO EXECUTIVO =====
+        if y_position < 2*inch:
+            c.showPage()
+            c.setFillColor(COR_TEXTO)
+            y_position = height - 1*inch
+        
+        c.setFillColor(COR_SECUNDARIA)
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(1*inch, y_position, "RESUMO EXECUTIVO:")
+        y_position -= 0.25*inch
+        
+        c.setFillColor(COR_TEXTO)
+        c.setFont("Helvetica", 9)
+        
+        # Resumo baseado na média
+        if media:
+            if media <= 5:
+                resumo = f"O perfil atual indica oportunidades significativas de desenvolvimento nas competências psicossociais. Com uma média de {media}/10, recomenda-se foco prioritário no fortalecimento das habilidades avaliadas."
+            elif media <= 7:
+                resumo = f"Perfil em desenvolvimento com bases sólidas (média {media}/10). As competências demonstram boa estruturação com espaço para otimização estratégica."
+            else:
+                resumo = f"Excelente desempenho psicossocial (média {media}/10). O perfil demonstra competências bem consolidadas, indicando alta capacidade de adaptação e resiliência."
+            
+            # Quebra de texto para o resumo
+            resumo_lines = []
+            words = resumo.split()
+            current_line = ""
+            
+            for word in words:
+                if len(current_line + " " + word) <= 70:
+                    current_line += " " + word if current_line else word
+                else:
+                    resumo_lines.append(current_line)
+                    current_line = word
+            if current_line:
+                resumo_lines.append(current_line)
+            
+            for line in resumo_lines:
+                if y_position < 1*inch:
+                    c.showPage()
+                    c.setFillColor(COR_TEXTO)
+                    y_position = height - 1*inch
+                
+                c.drawString(1.2*inch, y_position, line)
+                y_position -= 0.18*inch
+        
         # ===== RODAPÉ =====
         c.setFillColor(HexColor("#666666"))
         c.setFont("Helvetica", 8)
         c.drawString(1*inch, 0.5*inch, f"Relatório gerado automaticamente pelo Sistema DoctorFit MindTrack • {datetime.now().strftime('%d/%m/%Y')}")
+        c.drawString(1*inch, 0.3*inch, "Confidencial - Uso exclusivo do aluno e equipe técnica")
         
         c.save()
         return filename
@@ -491,6 +649,11 @@ def gerar_relatorio_pdf(scores, insights, recomendacoes, tipo_avaliacao):
 
 # ================= PÁGINA CADASTRO =================
 def pagina_cadastro():
+    # Mostra a logo se existir
+    logo = carregar_logo()
+    if logo:
+        st.image(logo, use_container_width=True)
+    
     st.title("DoctorFit MindTrack 🧠")
     st.subheader("Sistema de Avaliação Psicossocial")
     
@@ -513,6 +676,11 @@ def pagina_cadastro():
 
 # ================= MENU PRINCIPAL =================
 def pagina_menu_principal():
+    # Mostra a logo se existir
+    logo = carregar_logo()
+    if logo:
+        st.image(logo, use_container_width=True)
+    
     st.title(f"Bem-vindo, {st.session_state.aluno}!")
     st.write(f"Turma: {st.session_state.turma}")
     
@@ -592,6 +760,11 @@ def pagina_menu_principal():
 
 # ================= AVALIAÇÃO GERAL =================
 def pagina_avaliacao_geral():
+    # Mostra a logo se existir
+    logo = carregar_logo()
+    if logo:
+        st.image(logo, use_container_width=True)
+    
     st.title("🌍 Avaliação Geral")
     st.write("Avalie suas habilidades no contexto geral da vida")
     
@@ -667,7 +840,7 @@ def pagina_avaliacao_geral():
         # Gráfico em tempo real
         grafico_path = gerar_grafico_avaliacao(scores, "Resultados Avaliação Geral", "geral_preview")
         if grafico_path:
-            st.image(grafico_path, use_column_width=True)
+            st.image(grafico_path, use_container_width=True)  # CORREÇÃO: use_container_width
             try:
                 os.remove(grafico_path)
             except:
@@ -707,6 +880,11 @@ def pagina_avaliacao_geral():
 
 # ================= AVALIAÇÃO DE TREINO =================
 def pagina_avaliacao_treino():
+    # Mostra a logo se existir
+    logo = carregar_logo()
+    if logo:
+        st.image(logo, use_container_width=True)
+    
     st.title("💪 Avaliação de Treino")
     st.write("Avalie suas habilidades no contexto do treino esportivo")
     
@@ -782,7 +960,7 @@ def pagina_avaliacao_treino():
         # Gráfico em tempo real
         grafico_path = gerar_grafico_avaliacao(scores, "Resultados Avaliação de Treino", "treino_preview")
         if grafico_path:
-            st.image(grafico_path, use_column_width=True)
+            st.image(grafico_path, use_container_width=True)  # CORREÇÃO: use_container_width
             try:
                 os.remove(grafico_path)
             except:
